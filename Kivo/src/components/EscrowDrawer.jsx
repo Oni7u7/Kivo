@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useMyEscrows, getMyRole, getEscrowStatus } from '../hooks/useMyEscrows'
+import { EscrowDetailModal } from './EscrowDetailModal'
 
 function shorten(addr, start = 6, end = 4) {
   if (!addr) return '—'
@@ -22,6 +23,7 @@ function formatDate(d) {
  */
 export function EscrowDrawer({ walletAddress, onClose }) {
   const { escrows, loading, error, fetchEscrows } = useMyEscrows()
+  const [selected, setSelected] = useState(null)
 
   useEffect(() => {
     fetchEscrows(walletAddress)
@@ -88,21 +90,34 @@ export function EscrowDrawer({ walletAddress, onClose }) {
               key={escrow.engagementId || escrow.contractId || i}
               escrow={escrow}
               walletAddress={walletAddress}
+              onClick={() => setSelected(escrow)}
             />
           ))}
         </div>
       </aside>
+
+      {/* ── Modal de detalle ── */}
+      {selected && (
+        <EscrowDetailModal
+          escrow={selected}
+          walletAddress={walletAddress}
+          onClose={() => setSelected(null)}
+          onActionDone={() => fetchEscrows(walletAddress)}
+        />
+      )}
     </>
   )
 }
 
 /* ── Tarjeta individual ─────────────────────────────────────────────── */
-function EscrowCard({ escrow, walletAddress }) {
+function EscrowCard({ escrow, walletAddress, onClick }) {
   const status = getEscrowStatus(escrow)
   const myRole = getMyRole(escrow, walletAddress)
 
   return (
-    <div className="escrow-card">
+    <div className="escrow-card escrow-card-clickable" onClick={onClick} role="button" tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && onClick?.()}
+    >
       {/* Fila superior */}
       <div className="ec-top">
         <span className="ec-title">{escrow.title || 'Sin título'}</span>

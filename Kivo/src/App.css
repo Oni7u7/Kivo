@@ -1244,3 +1244,389 @@ h2 {
   .drawer { width: 100vw; }
   .btn-my-escrows span { display: none; }
 }
+
+/* ─────────────────────────────────────────
+   ESCROW CARD — clickable
+───────────────────────────────────────── */
+.escrow-card-clickable {
+  cursor: pointer;
+  outline: none;
+}
+.escrow-card-clickable:hover {
+  border-color: rgba(45,212,191,0.3);
+  background: rgba(45,212,191,0.04);
+}
+.escrow-card-clickable:focus-visible {
+  border-color: rgba(45,212,191,0.5);
+}
+
+/* ─────────────────────────────────────────
+   ESCROW DETAIL MODAL
+───────────────────────────────────────── */
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(9,9,15,0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.detail-box {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 88svh;
+  overflow-y: auto;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+}
+
+/* ── Header ── */
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.detail-header-left { display: flex; flex-direction: column; gap: 4px; }
+.detail-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.4px;
+  margin: 6px 0 0;
+}
+.detail-type { font-size: 12px; color: var(--muted); margin: 0; }
+
+/* ── Monto ── */
+.detail-amount-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.detail-amount { display: flex; align-items: baseline; gap: 6px; }
+.detail-amount-val {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -1px;
+}
+.detail-amount-sym {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.detail-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: auto;
+}
+.detail-balance-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.detail-balance-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+/* ── Descripción ── */
+.detail-desc {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* ── Secciones ── */
+.detail-section { display: flex; flex-direction: column; gap: 10px; }
+.detail-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+}
+
+/* ── Roles Grid ── */
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.role-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.2s;
+}
+.role-card-mine {
+  border-color: rgba(45,212,191,0.35);
+  background: rgba(45,212,191,0.05);
+}
+
+.role-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.role-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.role-you-badge {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--teal);
+  background: var(--teal-dim);
+  border: 1px solid rgba(45,212,191,0.3);
+  border-radius: 10px;
+  padding: 1px 6px;
+}
+.role-addr {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: ui-monospace, Consolas, monospace;
+  word-break: break-all;
+}
+.role-desc {
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+/* ── Milestones ── */
+.milestones-list { display: flex; flex-direction: column; gap: 6px; }
+.milestone-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.milestone-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+.milestone-done { background: var(--teal); box-shadow: 0 0 5px var(--teal); }
+.milestone-desc { font-size: 13px; color: var(--text); flex: 1; }
+.milestone-check { font-size: 12px; color: var(--teal); font-weight: 700; }
+
+/* ── Contract ID ── */
+.detail-contract-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.detail-contract-id {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: ui-monospace, Consolas, monospace;
+  word-break: break-all;
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* ── Actions ── */
+.detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.action-block { display: flex; flex-direction: column; gap: 10px; }
+
+.fund-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.fund-input-wrap {
+  position: relative;
+  flex: 1;
+}
+.fund-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 9px 44px 9px 12px;
+  font-size: 14px;
+  color: var(--white);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.fund-input:focus { border-color: rgba(212,166,71,0.4); }
+.fund-sym {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  pointer-events: none;
+}
+
+.btn-action-fund {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 20px;
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-action-fund:hover:not(:disabled) { background: var(--gold-light); }
+.btn-action-fund:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Progreso de fondeo ── */
+.fund-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.fund-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+.fund-progress-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.fund-progress-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+.fund-remaining-hint {
+  font-size: 12px;
+  color: var(--gold-light);
+  margin: 0;
+}
+.fund-partial-warn {
+  font-size: 12px;
+  color: #f59e0b;
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 0;
+}
+
+.action-warn {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+.btn-action-release {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 22px;
+  background: var(--teal-dim);
+  color: var(--teal);
+  border: 1px solid rgba(45,212,191,0.3);
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  align-self: flex-start;
+}
+.btn-action-release:hover:not(:disabled) {
+  background: rgba(45,212,191,0.2);
+  border-color: rgba(45,212,191,0.5);
+}
+.btn-action-release:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Action success ── */
+.action-success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(45,212,191,0.08);
+  border: 1px solid rgba(45,212,191,0.25);
+  border-radius: 12px;
+  color: var(--teal);
+  font-size: 14px;
+  font-weight: 600;
+}
+.action-success-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(45,212,191,0.15);
+  border: 1px solid rgba(45,212,191,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .detail-box    { padding: 20px; border-radius: 16px; }
+  .roles-grid    { grid-template-columns: 1fr 1fr; }
+  .fund-row      { flex-direction: column; align-items: stretch; }
+  .btn-action-fund { justify-content: center; }
+}

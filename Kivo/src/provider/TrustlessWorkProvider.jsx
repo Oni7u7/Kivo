@@ -1,4 +1,4 @@
-import { TrustlessWorkConfig, development } from '@trustless-work/escrow'
+import { TrustlessWorkConfig, development} from '@trustless-work/escrow'
 
 /**
  * Envuelve la app con el proveedor del SDK de Trustless Work.

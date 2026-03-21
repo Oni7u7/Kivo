@@ -97,7 +97,7 @@ export default function App() {
         <p className="hero-eyebrow">Stellar Hackathon 2026</p>
         <h1 className="hero-title">
           Rieles de Confianza<br />
-          <span className="text-gold">para el Comercio Moderno</span>
+          <span className="text-gold">para el Comercio Mexicano</span>
         </h1>
         <p className="hero-body">
           Custodia programática sobre Stellar. El dinero solo se libera cuando
