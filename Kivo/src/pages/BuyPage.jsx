@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { ConnectButton } from 'accesly'
 import { useWallet } from '../context/WalletContext'
+import { useLanguage } from '../context/LanguageContext'
 import { useEscrowFlow } from '../hooks/useEscrowFlow'
 
 function shortenAddress(addr) {
@@ -14,6 +16,17 @@ export function BuyPage() {
   const title    = params.get('title')    || 'Oferta'
   const desc     = params.get('desc')     || title
   const resolver = params.get('resolver') || seller
+  const langParam = params.get('lang')
+
+  const { t, setLang } = useLanguage()
+  const b = t.buy
+
+  // Aplica el idioma del vendedor al abrir la página
+  useEffect(() => {
+    if (langParam && ['es', 'en', 'pt'].includes(langParam)) {
+      setLang(langParam)
+    }
+  }, [langParam, setLang])
 
   const {
     walletAddress,
@@ -50,10 +63,8 @@ export function BuyPage() {
         <div className="buy-container">
           <div className="buy-card">
             <div className="modal-success-icon">✓</div>
-            <h2 style={{ marginBottom: '0.5rem' }}>¡Escrow creado!</h2>
-            <p style={{ color: 'var(--muted)', marginBottom: '1rem' }}>
-              Tu compra está protegida en la red Stellar.
-            </p>
+            <h2 style={{ marginBottom: '0.5rem' }}>{b.successTitle}</h2>
+            <p style={{ color: 'var(--muted)', marginBottom: '1rem' }}>{b.successSub}</p>
             {result.contractId && (
               <div className="contract-id-box">
                 <span className="contract-label">Contract ID</span>
@@ -61,9 +72,9 @@ export function BuyPage() {
               </div>
             )}
             <div className="buy-flow-info" style={{ marginTop: '1.25rem' }}>
-              <div className="flow-step"><span className="flow-n">1</span> Escrow desplegado en Stellar</div>
-              <div className="flow-step"><span className="flow-n">2</span> Financia el escrow con {amount} USDC</div>
-              <div className="flow-step"><span className="flow-n">3</span> Aprueba cuando el vendedor entregue</div>
+              <div className="flow-step"><span className="flow-n">1</span> {b.successStep1}</div>
+              <div className="flow-step"><span className="flow-n">2</span> {b.successStep2} {amount} USDC</div>
+              <div className="flow-step"><span className="flow-n">3</span> {b.successStep3}</div>
             </div>
           </div>
         </div>
@@ -83,25 +94,25 @@ export function BuyPage() {
 
       <div className="buy-container">
         <div className="buy-card">
-          <span className="modal-tag">Oferta de compra segura</span>
+          <span className="modal-tag">{b.tag}</span>
           <h2 className="buy-title">{title}</h2>
           {desc !== title && <p className="buy-desc">{desc}</p>}
 
           <div className="buy-details">
             <div className="buy-detail-row">
-              <span className="buy-detail-label">Precio</span>
+              <span className="buy-detail-label">USDC</span>
               <span className="buy-amount">{amount} USDC</span>
             </div>
             <div className="buy-detail-row">
-              <span className="buy-detail-label">Vendedor</span>
+              <span className="buy-detail-label">{t.offer?.qrSeller || 'Vendedor'}</span>
               <code className="modal-wallet-addr">{shortenAddress(seller)}</code>
             </div>
           </div>
 
           <div className="buy-flow-info">
-            <div className="flow-step"><span className="flow-n">1</span> Conecta tu wallet</div>
-            <div className="flow-step"><span className="flow-n">2</span> Tu dirección queda como comprador en el escrow</div>
-            <div className="flow-step"><span className="flow-n">3</span> Financia y espera la entrega para liberar fondos</div>
+            <div className="flow-step"><span className="flow-n">1</span> {b.step1}</div>
+            <div className="flow-step"><span className="flow-n">2</span> {b.step2}</div>
+            <div className="flow-step"><span className="flow-n">3</span> {b.step3}</div>
           </div>
 
           {error && <div className="modal-error">{error}</div>}
@@ -110,7 +121,7 @@ export function BuyPage() {
             <>
               <div className="modal-wallet-row" style={{ marginBottom: '1rem' }}>
                 <span className="status-dot" />
-                <span className="modal-wallet-label">Tu wallet:</span>
+                <span className="modal-wallet-label">{b.yourWallet}</span>
                 <code className="modal-wallet-addr">{shortenAddress(walletAddress)}</code>
               </div>
               <button
@@ -119,22 +130,16 @@ export function BuyPage() {
                 disabled={loading}
               >
                 {loading
-                  ? <><span className="spinner" /> Creando escrow...</>
-                  : `Comprar por ${amount} USDC`
+                  ? <><span className="spinner" /> {b.buying}</>
+                  : `${b.buyBtn} ${amount} USDC`
                 }
               </button>
             </>
           ) : (
             <div className="buy-connect-section">
-              <p style={{ color: 'var(--muted)', marginBottom: '1rem' }}>
-                Conecta tu wallet para comprar de forma segura
-              </p>
+              <p style={{ color: 'var(--muted)', marginBottom: '1rem' }}>{b.connectHint}</p>
               <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <button
-                  className="btn-connect-freighter"
-                  onClick={connectFreighter}
-                  disabled={freighterLoading}
-                >
+                <button className="btn-connect-freighter" onClick={connectFreighter} disabled={freighterLoading}>
                   {freighterLoading ? <span className="spinner" /> : 'Freighter'}
                 </button>
                 <ConnectButton />
@@ -147,7 +152,7 @@ export function BuyPage() {
   )
 }
 
-/* ── Navbar reutilizable dentro de BuyPage ── */
+/* ── Navbar ── */
 function BuyNav({ freighterAddr, freighterLoading, connectFreighter, disconnectFreighter }) {
   return (
     <nav className="navbar">

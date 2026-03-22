@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useWallet } from '../context/WalletContext'
+import { useLanguage } from '../context/LanguageContext'
 
 function shortenAddress(addr) {
   if (!addr) return ''
@@ -9,6 +10,8 @@ function shortenAddress(addr) {
 
 export function CreateOfferModal({ onClose }) {
   const { walletAddress } = useWallet()
+  const { t, lang } = useLanguage()
+  const o = t.offer
 
   const [form, setForm] = useState({
     title:    '',
@@ -17,8 +20,8 @@ export function CreateOfferModal({ onClose }) {
     resolver: '',
   })
 
-  const [offerUrl, setOfferUrl]   = useState(null)
-  const [copied,   setCopied]     = useState(false)
+  const [offerUrl, setOfferUrl] = useState(null)
+  const [copied,   setCopied]   = useState(false)
 
   function handleChange(ev) {
     setForm(prev => ({ ...prev, [ev.target.name]: ev.target.value }))
@@ -31,6 +34,7 @@ export function CreateOfferModal({ onClose }) {
     url.searchParams.set('seller', walletAddress)
     url.searchParams.set('amount', form.amount)
     url.searchParams.set('title',  form.title)
+    url.searchParams.set('lang',   lang)
     if (form.desc)     url.searchParams.set('desc',     form.desc)
     if (form.resolver) url.searchParams.set('resolver', form.resolver)
     setOfferUrl(url.toString())
@@ -50,49 +54,45 @@ export function CreateOfferModal({ onClose }) {
         <div className="modal-form">
           <div className="modal-header">
             <div>
-              <span className="modal-tag">QR Generado</span>
-              <h2 className="modal-title">Comparte con el comprador</h2>
+              <span className="modal-tag">{o.qrTag}</span>
+              <h2 className="modal-title">{o.qrTitle}</h2>
             </div>
             <button type="button" className="modal-x" onClick={onClose} aria-label="Cerrar">×</button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
-            {/* QR */}
             <div style={{ background: '#fff', padding: '1rem', borderRadius: '12px' }}>
               <QRCodeSVG value={offerUrl} size={200} />
             </div>
 
-            {/* Resumen de la oferta */}
             <div className="buy-details" style={{ width: '100%' }}>
               <div className="buy-detail-row">
-                <span className="buy-detail-label">Producto</span>
+                <span className="buy-detail-label">{o.qrProduct}</span>
                 <span style={{ color: 'var(--text)' }}>{form.title}</span>
               </div>
               <div className="buy-detail-row">
-                <span className="buy-detail-label">Precio</span>
+                <span className="buy-detail-label">{o.qrPrice}</span>
                 <span className="buy-amount">{form.amount} USDC</span>
               </div>
               <div className="buy-detail-row">
-                <span className="buy-detail-label">Tu dirección</span>
+                <span className="buy-detail-label">{o.qrSeller}</span>
                 <code className="modal-wallet-addr">{shortenAddress(walletAddress)}</code>
               </div>
             </div>
 
-            {/* URL copiable */}
             <div className="contract-id-box" style={{ width: '100%' }}>
-              <span className="contract-label">Enlace de la oferta</span>
+              <span className="contract-label">{o.qrUrlLabel}</span>
               <code className="contract-value" style={{ fontSize: '0.63rem', wordBreak: 'break-all' }}>
                 {offerUrl}
               </code>
             </div>
 
-            {/* Acciones */}
             <div className="modal-actions" style={{ width: '100%' }}>
               <button className="btn-modal-ghost" onClick={() => setOfferUrl(null)} style={{ flex: 1 }}>
-                Nueva oferta
+                {o.newOffer}
               </button>
               <button className="btn-modal-primary" onClick={handleCopy} style={{ flex: 1 }}>
-                {copied ? '¡Copiado!' : 'Copiar enlace'}
+                {copied ? o.copied : o.copyLink}
               </button>
             </div>
           </div>
@@ -107,27 +107,26 @@ export function CreateOfferModal({ onClose }) {
       <form className="modal-form" onSubmit={handleGenerate}>
         <div className="modal-header">
           <div>
-            <span className="modal-tag">Vender</span>
-            <h2 className="modal-title">Crear oferta con QR</h2>
+            <span className="modal-tag">{o.modalTag}</span>
+            <h2 className="modal-title">{o.modalTitle}</h2>
           </div>
           <button type="button" className="modal-x" onClick={onClose} aria-label="Cerrar">×</button>
         </div>
 
-        {/* Vendedor (pre-llenado con tu wallet) */}
         <div className="modal-wallet-row">
           <span className="status-dot" />
-          <span className="modal-wallet-label">Tu dirección (vendedor)</span>
+          <span className="modal-wallet-label">{o.sellerLabel}</span>
           <code className="modal-wallet-addr">{shortenAddress(walletAddress)}</code>
         </div>
 
         <div className="form-grid">
           <div className="form-field">
             <label className="form-label">
-              Producto o servicio <span className="form-required">*</span>
+              {o.fieldProduct} <span className="form-required">*</span>
             </label>
             <input
               name="title"
-              placeholder="Ej: Bolsa de café orgánico 1 kg"
+              placeholder={o.fieldProductPlaceholder}
               value={form.title}
               onChange={handleChange}
               required
@@ -136,12 +135,12 @@ export function CreateOfferModal({ onClose }) {
 
           <div className="form-field">
             <label className="form-label">
-              Descripción <span className="form-hint"> — opcional</span>
+              {o.fieldDesc} <span className="form-hint"> {o.fieldDescOptional}</span>
             </label>
             <textarea
               name="desc"
               rows={2}
-              placeholder="Detalles adicionales del producto..."
+              placeholder={o.fieldDescPlaceholder}
               value={form.desc}
               onChange={handleChange}
             />
@@ -149,7 +148,7 @@ export function CreateOfferModal({ onClose }) {
 
           <div className="form-field">
             <label className="form-label">
-              Precio (USDC) <span className="form-required">*</span>
+              {o.fieldAmount} <span className="form-required">*</span>
             </label>
             <input
               type="number"
@@ -167,15 +166,15 @@ export function CreateOfferModal({ onClose }) {
           {form.amount > 0 && (
             <div className="fee-breakdown">
               <div className="fee-breakdown-row">
-                <span>Precio de venta</span>
+                <span>{o.feeLabel}</span>
                 <span>{Number(form.amount).toFixed(2)} USDC</span>
               </div>
               <div className="fee-breakdown-row fee-breakdown-deduction">
-                <span>Comisión Kivo (1%)</span>
+                <span>{o.feeKivo}</span>
                 <span>− {(Number(form.amount) * 0.01).toFixed(2)} USDC</span>
               </div>
               <div className="fee-breakdown-row fee-breakdown-total">
-                <span>Recibes tú</span>
+                <span>{o.feeYou}</span>
                 <span>{(Number(form.amount) * 0.99).toFixed(2)} USDC</span>
               </div>
             </div>
@@ -183,30 +182,29 @@ export function CreateOfferModal({ onClose }) {
 
           <div className="form-field">
             <label className="form-label">
-              Árbitro <span className="form-hint"> — opcional, por defecto tu dirección</span>
+              {o.fieldResolver} <span className="form-hint"> {o.fieldResolverHint}</span>
             </label>
             <input
               name="resolver"
-              placeholder="G... (dirección Stellar del árbitro)"
+              placeholder={o.fieldResolverPlaceholder}
               value={form.resolver}
               onChange={handleChange}
             />
           </div>
         </div>
 
-        {/* Info del flujo */}
         <div className="modal-flow-info">
-          <div className="flow-step"><span className="flow-n">1</span> El comprador escanea el QR y conecta su wallet</div>
-          <div className="flow-step"><span className="flow-n">2</span> El escrow se crea con ambas direcciones automáticamente</div>
-          <div className="flow-step"><span className="flow-n">3</span> El comprador aprueba al recibir — los fondos te llegan</div>
+          <div className="flow-step"><span className="flow-n">1</span> {o.step1}</div>
+          <div className="flow-step"><span className="flow-n">2</span> {o.step2}</div>
+          <div className="flow-step"><span className="flow-n">3</span> {o.step3}</div>
         </div>
 
         <div className="modal-actions">
           <button type="button" className="btn-modal-ghost" onClick={onClose}>
-            Cancelar
+            {o.cancel}
           </button>
           <button type="submit" className="btn-modal-primary">
-            Generar QR
+            {o.generate}
           </button>
         </div>
       </form>

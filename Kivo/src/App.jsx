@@ -86,7 +86,7 @@ export default function App() {
                 </button>
               )}
               <button className="btn-my-escrows" onClick={() => setShowOffer(true)}>
-                Vender
+                {t.offer?.navBtn || 'Vender'}
               </button>
               <button className="btn-my-escrows" onClick={() => setShowDrawer(true)}>
                 {t.nav.myEscrows}
