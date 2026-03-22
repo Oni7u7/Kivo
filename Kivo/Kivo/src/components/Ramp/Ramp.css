@@ -1,0 +1,413 @@
+/* ─────────────────────────────────────────
+   RAMP MODULE — usa los tokens de App.css
+───────────────────────────────────────── */
+
+/* ── Overlay / Modal ── */
+.ramp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(9, 9, 15, 0.82);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.ramp-modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90svh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.ramp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+}
+
+.ramp-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ramp-title-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(212, 166, 71, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.ramp-close {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.ramp-close:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* ── Tabs ── */
+.ramp-tabs {
+  display: flex;
+  gap: 0;
+  margin: 20px 24px 0;
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.ramp-tab {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ramp-tab.active {
+  background: var(--card);
+  color: var(--teal);
+}
+
+.ramp-tab:hover:not(.active) {
+  color: var(--text);
+}
+
+/* ── Form body ── */
+.ramp-body {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Field ── */
+.ramp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ramp-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ramp-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ramp-input {
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 60px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.ramp-input:focus {
+  border-color: var(--teal);
+}
+
+.ramp-input-badge {
+  position: absolute;
+  right: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--teal);
+  background: var(--teal-dim);
+  padding: 2px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* ── Quote preview box ── */
+.ramp-quote-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ramp-quote-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.ramp-quote-label {
+  color: var(--muted);
+}
+
+.ramp-quote-val {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.ramp-quote-val.highlight {
+  color: var(--gold-light);
+  font-size: 1rem;
+}
+
+.ramp-quote-expire {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* ── Info note ── */
+.ramp-note {
+  background: var(--teal-dim);
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: var(--teal);
+  line-height: 1.5;
+}
+
+/* ── Buttons ── */
+.ramp-btn-primary {
+  width: 100%;
+  padding: 13px;
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ramp-btn-primary:hover:not(:disabled) {
+  background: var(--gold-light);
+}
+
+.ramp-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ramp-btn-ghost {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.ramp-btn-ghost:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* ── Spinner ── */
+.ramp-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(9, 9, 15, 0.3);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: ramp-spin 0.7s linear infinite;
+}
+
+@keyframes ramp-spin { to { transform: rotate(360deg); } }
+
+/* ── Error banner ── */
+.ramp-error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.83rem;
+  color: #f87171;
+  line-height: 1.5;
+}
+
+/* ── ORDER STATUS ── */
+.ramp-status-wrap {
+  padding: 8px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ramp-status-header {
+  text-align: center;
+}
+
+.ramp-status-icon {
+  font-size: 2.8rem;
+  margin-bottom: 8px;
+}
+
+.ramp-status-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.ramp-status-sub {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ── CLABE card ── */
+.ramp-clabe-card {
+  background: var(--gold-dim);
+  border: 1px solid rgba(212, 166, 71, 0.3);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ramp-clabe-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+}
+
+.ramp-clabe-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  letter-spacing: 0.08em;
+  word-break: break-all;
+}
+
+.ramp-clabe-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* ── Progress steps ── */
+.ramp-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ramp-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ramp-step-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ramp-step-dot.done {
+  background: var(--teal-dim);
+  border: 1.5px solid var(--teal);
+  color: var(--teal);
+}
+
+.ramp-step-dot.active {
+  background: var(--gold-dim);
+  border: 1.5px solid var(--gold);
+  color: var(--gold);
+  animation: ramp-pulse 1.5s ease-in-out infinite;
+}
+
+.ramp-step-dot.pending {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+}
+
+@keyframes ramp-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 166, 71, 0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(212, 166, 71, 0); }
+}
+
+.ramp-step-text {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.ramp-step-text.active { color: var(--text); }
+.ramp-step-text.done   { color: var(--teal); }
+
+/* ── Summary row ── */
+.ramp-summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
