@@ -7,10 +7,16 @@ import {
   useSendTransaction,
 } from '@trustless-work/escrow/hooks'
 import { useWallet } from '../context/WalletContext'
+import { useNetwork } from '../context/NetworkContext'
 
 const USDC_TESTNET = {
   symbol: 'USDC',
   address: 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5',
+}
+
+const USDC_MAINNET = {
+  symbol: 'USDC',
+  address: 'GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN',
 }
 
 const KIVO_PLATFORM_ADDRESS = import.meta.env.VITE_KIVO_PLATFORM_ADDRESS || ''
@@ -33,6 +39,8 @@ export function useEscrowFlow() {
   const [result, setResult]   = useState(null)
 
   const { signTransaction } = useWallet()
+  const { network } = useNetwork()
+  const USDC = network === 'mainnet' ? USDC_MAINNET : USDC_TESTNET
 
   const { deployEscrow }            = useInitializeEscrow()
   const { fundEscrow: fund }        = useFundEscrow()
@@ -67,7 +75,7 @@ export function useEscrowFlow() {
         milestones: [
           { description: formData.milestoneDesc || formData.description },
         ],
-        trustline: USDC_TESTNET,
+        trustline: USDC,
       }
 
       const { unsignedTransaction, status } = await deployEscrow(payload, 'single-release')

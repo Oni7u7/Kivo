@@ -1,20 +1,16 @@
 import { useState } from 'react'
 import { useEscrowFlow } from '../hooks/useEscrowFlow'
+import { useLanguage } from '../context/LanguageContext'
 
 function shortenAddress(addr) {
   if (!addr) return ''
   return `${addr.slice(0, 8)}...${addr.slice(-6)}`
 }
 
-/**
- * Modal para crear un escrow de liberación única con TrustlessWork.
- *
- * Props:
- *   - walletAddress: string  (dirección del cliente/comprador conectado)
- *   - onClose: () => void
- */
 export function EscrowModal({ walletAddress, onClose }) {
   const { createEscrow, loading, error, result } = useEscrowFlow()
+  const { t } = useLanguage()
+  const e = t.escrow
 
   const [form, setForm] = useState({
     title:           '',
@@ -27,12 +23,12 @@ export function EscrowModal({ walletAddress, onClose }) {
     platformFee:     '2',
   })
 
-  function handleChange(e) {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  function handleChange(ev) {
+    setForm(prev => ({ ...prev, [ev.target.name]: ev.target.value }))
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault()
+  async function handleSubmit(ev) {
+    ev.preventDefault()
     await createEscrow(form, walletAddress)
   }
 
@@ -42,10 +38,8 @@ export function EscrowModal({ walletAddress, onClose }) {
       <ModalOverlay onClose={onClose}>
         <div className="modal-success">
           <div className="modal-success-icon">✓</div>
-          <h3>¡Escrow creado!</h3>
-          <p className="modal-success-sub">
-            Tu contrato de custodia está desplegado en la red Stellar.
-          </p>
+          <h3>{e.successTitle}</h3>
+          <p className="modal-success-sub">{e.successSub}</p>
           {result.contractId ? (
             <div className="contract-id-box">
               <span className="contract-label">Contract ID</span>
@@ -53,11 +47,11 @@ export function EscrowModal({ walletAddress, onClose }) {
             </div>
           ) : (
             <p className="modal-success-sub" style={{ color: 'var(--teal)' }}>
-              Transacción enviada — el Contract ID se confirma en unos segundos.
+              {e.successPending}
             </p>
           )}
           <button className="btn-modal-close" onClick={onClose}>
-            Cerrar
+            {e.close}
           </button>
         </div>
       </ModalOverlay>
@@ -71,53 +65,53 @@ export function EscrowModal({ walletAddress, onClose }) {
         {/* Header */}
         <div className="modal-header">
           <div>
-            <span className="modal-tag">TrustlessWork · Single-Release</span>
-            <h2 className="modal-title">Nuevo Escrow</h2>
+            <span className="modal-tag">{e.tag}</span>
+            <h2 className="modal-title">{e.title}</h2>
           </div>
-          <button type="button" className="modal-x" onClick={onClose} aria-label="Cerrar">×</button>
+          <button type="button" className="modal-x" onClick={onClose} aria-label={e.close}>×</button>
         </div>
 
         {/* Wallet del cliente */}
         <div className="modal-wallet-row">
           <span className="status-dot" />
-          <span className="modal-wallet-label">Cliente (tú)</span>
+          <span className="modal-wallet-label">{e.clientLabel}</span>
           <code className="modal-wallet-addr">{shortenAddress(walletAddress)}</code>
         </div>
 
         {/* Campos del escrow */}
         <div className="form-grid">
-          <Field label="Título del Escrow" required>
+          <Field label={e.fieldTitle} required>
             <input
               name="title"
-              placeholder="Ej. Compra de vehículo Toyota 2022"
+              placeholder={e.fieldTitlePlaceholder}
               value={form.title}
               onChange={handleChange}
               required
             />
           </Field>
 
-          <Field label="Descripción" required>
+          <Field label={e.fieldDesc} required>
             <textarea
               name="description"
               rows={2}
-              placeholder="Describe el acuerdo entre las partes…"
+              placeholder={e.fieldDescPlaceholder}
               value={form.description}
               onChange={handleChange}
               required
             />
           </Field>
 
-          <Field label="Descripción del hito" hint="¿Qué debe entregarse para liberar los fondos?">
+          <Field label={e.fieldMilestone} hint={e.fieldMilestoneHint}>
             <input
               name="milestoneDesc"
-              placeholder="Ej. Entrega física del vehículo con documentación"
+              placeholder={e.fieldMilestonePlaceholder}
               value={form.milestoneDesc}
               onChange={handleChange}
             />
           </Field>
 
           <div className="form-two-col">
-            <Field label="Monto (USDC)" required>
+            <Field label={e.fieldAmount} required>
               <input
                 type="number"
                 name="amount"
@@ -131,12 +125,12 @@ export function EscrowModal({ walletAddress, onClose }) {
             </Field>
 
             <div className="form-field">
-              <label className="form-label">Comisión Kivo</label>
+              <label className="form-label">{e.fieldFee}</label>
               <div className="platform-fee-badge">2%</div>
             </div>
           </div>
 
-          <Field label="Dirección del Vendedor (Service Provider)" required>
+          <Field label={e.fieldProvider} required>
             <input
               name="serviceProvider"
               placeholder="G..."
@@ -146,19 +140,16 @@ export function EscrowModal({ walletAddress, onClose }) {
             />
           </Field>
 
-          <Field
-            label="Dirección del Receptor"
-            hint="Deja vacío para usar la misma del vendedor"
-          >
+          <Field label={e.fieldReceiver} hint={e.fieldReceiverHint}>
             <input
               name="receiver"
-              placeholder="G... (opcional)"
+              placeholder={e.fieldReceiverPlaceholder}
               value={form.receiver}
               onChange={handleChange}
             />
           </Field>
 
-          <Field label="Resolutor de Disputas" hint="Árbitro neutral en caso de conflicto" required>
+          <Field label={e.fieldDispute} hint={e.fieldDisputeHint} required>
             <input
               name="disputeResolver"
               placeholder="G..."
@@ -171,9 +162,9 @@ export function EscrowModal({ walletAddress, onClose }) {
 
         {/* Info del flujo */}
         <div className="modal-flow-info">
-          <div className="flow-step"><span className="flow-n">1</span> Se despliega el contrato en Soroban</div>
-          <div className="flow-step"><span className="flow-n">2</span> Firmas con Freighter</div>
-          <div className="flow-step"><span className="flow-n">3</span> Se envía a la red Stellar</div>
+          <div className="flow-step"><span className="flow-n">1</span> {e.step1}</div>
+          <div className="flow-step"><span className="flow-n">2</span> {e.step2}</div>
+          <div className="flow-step"><span className="flow-n">3</span> {e.step3}</div>
         </div>
 
         {/* Error */}
@@ -184,13 +175,13 @@ export function EscrowModal({ walletAddress, onClose }) {
         {/* Actions */}
         <div className="modal-actions">
           <button type="button" className="btn-modal-ghost" onClick={onClose} disabled={loading}>
-            Cancelar
+            {e.cancel}
           </button>
           <button type="submit" className="btn-modal-primary" disabled={loading}>
             {loading ? (
-              <><span className="spinner" /> Procesando…</>
+              <><span className="spinner" /> {e.processing}</>
             ) : (
-              'Crear Escrow'
+              e.create
             )}
           </button>
         </div>
@@ -204,7 +195,7 @@ function ModalOverlay({ children, onClose }) {
   return (
     <div
       className="modal-overlay"
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      onClick={ev => { if (ev.target === ev.currentTarget) onClose() }}
     >
       <div className="modal-box">
         {children}

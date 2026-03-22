@@ -7,6 +7,7 @@ import {
   signTransaction as freighterSignTransaction,
 } from '@stellar/freighter-api'
 import { Networks } from '@stellar/stellar-sdk'
+import { useNetwork } from './NetworkContext'
 
 const WalletContext = createContext(null)
 
@@ -15,6 +16,8 @@ const WalletContext = createContext(null)
  * Expone un wallet unificado: Accesly tiene prioridad si ambos están conectados.
  */
 export function WalletProvider({ children }) {
+  const { network } = useNetwork()
+
   const {
     wallet,
     connect: connectAccesly,
@@ -66,14 +69,14 @@ export function WalletProvider({ children }) {
     }
     if (walletType === 'freighter') {
       const result = await freighterSignTransaction(unsignedXdr, {
-        networkPassphrase: Networks.TESTNET,
+        networkPassphrase: network === 'mainnet' ? Networks.PUBLIC : Networks.TESTNET,
         address: freighterAddr,
       })
       // Freighter v6 devuelve { signedTxXdr }
       return { signedXdr: result.signedTxXdr ?? result }
     }
     throw new Error('No hay wallet conectada')
-  }, [walletType, acceslySign, freighterAddr])
+  }, [walletType, acceslySign, freighterAddr, network])
 
   return (
     <WalletContext.Provider value={{

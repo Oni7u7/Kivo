@@ -1,17 +1,42 @@
 import { useEffect, useState } from 'react'
-import { useMyEscrows, getMyRole, getEscrowStatus } from '../hooks/useMyEscrows'
+import { useMyEscrows } from '../hooks/useMyEscrows'
 import { EscrowDetailModal } from './EscrowDetailModal'
+import { useLanguage } from '../context/LanguageContext'
 
 function shorten(addr, start = 6, end = 4) {
   if (!addr) return '—'
   return `${addr.slice(0, start)}...${addr.slice(-end)}`
 }
 
-function formatDate(d) {
+function formatDate(d, locale) {
   if (!d?._seconds) return '—'
-  return new Date(d._seconds * 1000).toLocaleDateString('es-MX', {
+  return new Date(d._seconds * 1000).toLocaleDateString(locale, {
     day: '2-digit', month: 'short', year: 'numeric',
   })
+}
+
+/** Devuelve la clave del estado a partir de los flags del escrow */
+function getStatusKey(escrow) {
+  const f = escrow?.flags ?? {}
+  if (f.released) return 'released'
+  if (f.resolved) return 'resolved'
+  if (f.disputed) return 'disputed'
+  if (f.approved) return 'approved'
+  return 'active'
+}
+
+/** Devuelve la clave del rol del usuario en el escrow */
+function getRoleKey(escrow, walletAddress) {
+  if (!escrow?.roles || !walletAddress) return null
+  const r = escrow.roles
+  const addr = walletAddress.toLowerCase()
+  if (r.approver?.toLowerCase()        === addr) return 'approver'
+  if (r.serviceProvider?.toLowerCase() === addr) return 'serviceProvider'
+  if (r.disputeResolver?.toLowerCase() === addr) return 'disputeResolver'
+  if (r.releaseSigner?.toLowerCase()   === addr) return 'releaseSigner'
+  if (r.receiver?.toLowerCase()        === addr) return 'receiver'
+  if (r.platformAddress?.toLowerCase() === addr) return 'platformAddress'
+  return null
 }
 
 /**
@@ -24,11 +49,11 @@ function formatDate(d) {
 export function EscrowDrawer({ walletAddress, onClose }) {
   const { escrows, loading, error, fetchEscrows } = useMyEscrows()
   const [selected, setSelected] = useState(null)
+  const { t } = useLanguage()
+  const d = t.drawer
 
   useEffect(() => {
     fetchEscrows(walletAddress)
-    // fetchEscrows tiene referencia estable (useCallback con deps vacíos + refs),
-    // y walletAddress no cambia mientras el drawer está abierto.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletAddress])
 
@@ -42,19 +67,19 @@ export function EscrowDrawer({ walletAddress, onClose }) {
         {/* Header */}
         <div className="drawer-header">
           <div>
-            <span className="drawer-tag">TrustlessWork</span>
-            <h2 className="drawer-title">Mis Escrows</h2>
+            <span className="drawer-tag">{d.tag}</span>
+            <h2 className="drawer-title">{d.title}</h2>
           </div>
           <div className="drawer-header-right">
             <button
               className="drawer-refresh"
               onClick={() => fetchEscrows(walletAddress)}
               disabled={loading}
-              title="Actualizar"
+              title={d.refresh}
             >
               <RefreshIcon spinning={loading} />
             </button>
-            <button className="drawer-close" onClick={onClose} aria-label="Cerrar">×</button>
+            <button className="drawer-close" onClick={onClose} aria-label={d.close}>×</button>
           </div>
         </div>
 
@@ -69,7 +94,7 @@ export function EscrowDrawer({ walletAddress, onClose }) {
           {loading && (
             <div className="drawer-loading">
               <span className="spinner" style={{ width: 18, height: 18 }} />
-              <span>Cargando escrows…</span>
+              <span>{d.loading}</span>
             </div>
           )}
 
@@ -80,8 +105,8 @@ export function EscrowDrawer({ walletAddress, onClose }) {
           {!loading && !error && escrows.length === 0 && (
             <div className="drawer-empty">
               <span className="drawer-empty-icon">⬡</span>
-              <p>No tienes escrows aún.</p>
-              <p className="drawer-empty-sub">Crea uno con el botón "Crear Escrow".</p>
+              <p>{d.empty}</p>
+              <p className="drawer-empty-sub">{d.emptySub}</p>
             </div>
           )}
 
@@ -91,6 +116,7 @@ export function EscrowDrawer({ walletAddress, onClose }) {
               escrow={escrow}
               walletAddress={walletAddress}
               onClick={() => setSelected(escrow)}
+              t={t}
             />
           ))}
         </div>
@@ -110,9 +136,18 @@ export function EscrowDrawer({ walletAddress, onClose }) {
 }
 
 /* ── Tarjeta individual ─────────────────────────────────────────────── */
-function EscrowCard({ escrow, walletAddress, onClick }) {
-  const status = getEscrowStatus(escrow)
-  const myRole = getMyRole(escrow, walletAddress)
+function EscrowCard({ escrow, walletAddress, onClick, t }) {
+  const d = t.drawer
+  const dt = t.detail
+
+  const statusKey = getStatusKey(escrow)
+  const statusEntry = dt.statusLabels?.[statusKey] ?? { label: statusKey, color: 'status-active' }
+
+  const roleKey = getRoleKey(escrow, walletAddress)
+  const roleLabel = roleKey ? (dt.roles?.[roleKey]?.label ?? roleKey) : '—'
+
+  const milestoneCount = escrow.milestones?.length ?? 0
+  const milestoneWord = milestoneCount === 1 ? d.milestoneSingular : d.milestonePlural
 
   return (
     <div className="escrow-card escrow-card-clickable" onClick={onClick} role="button" tabIndex={0}
@@ -120,8 +155,8 @@ function EscrowCard({ escrow, walletAddress, onClick }) {
     >
       {/* Fila superior */}
       <div className="ec-top">
-        <span className="ec-title">{escrow.title || 'Sin título'}</span>
-        <span className={`ec-status ${status.color}`}>{status.label}</span>
+        <span className="ec-title">{escrow.title || d.noTitle}</span>
+        <span className={`ec-status ${statusEntry.color}`}>{statusEntry.label}</span>
       </div>
 
       {/* Monto */}
@@ -132,10 +167,10 @@ function EscrowCard({ escrow, walletAddress, onClick }) {
 
       {/* Metadata */}
       <div className="ec-meta">
-        <MetaItem label="Mi rol"     value={myRole}                       highlight />
-        <MetaItem label="Tipo"       value={escrow.type === 'multi-release' ? 'Multi-Release' : 'Single-Release'} />
-        <MetaItem label="Creado"     value={formatDate(escrow.createdAt)} />
-        <MetaItem label="Hitos"      value={`${escrow.milestones?.length ?? 0} hito${(escrow.milestones?.length ?? 0) !== 1 ? 's' : ''}`} />
+        <MetaItem label={d.roleLabel}       value={roleLabel}                                  highlight />
+        <MetaItem label={d.typeLabel}       value={escrow.type === 'multi-release' ? d.multiRelease : d.singleRelease} />
+        <MetaItem label={d.createdLabel}    value={formatDate(escrow.createdAt, d.dateLocale)} />
+        <MetaItem label={d.milestonesLabel} value={`${milestoneCount} ${milestoneWord}`}        />
       </div>
 
       {/* Contract ID */}
@@ -145,7 +180,7 @@ function EscrowCard({ escrow, walletAddress, onClick }) {
           <code className="ec-contract-val">{shorten(escrow.contractId, 10, 8)}</code>
           <button
             className="ec-copy"
-            title="Copiar Contract ID"
+            title={d.copyContractId}
             onClick={() => navigator.clipboard.writeText(escrow.contractId)}
           >
             <CopyIcon />

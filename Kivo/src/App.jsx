@@ -1,13 +1,22 @@
 import { useState } from 'react'
 import { ConnectButton } from 'accesly'
 import { useWallet } from './context/WalletContext'
+import { useLanguage } from './context/LanguageContext'
+import { useNetwork } from './context/NetworkContext'
 import { EscrowModal }  from './components/EscrowModal'
 import { EscrowDrawer } from './components/EscrowDrawer'
+import { RampPage }     from './components/Ramp/RampPage'
 import './App.css'
 
 function shortenAddress(addr) {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`
 }
+
+const LANGUAGES = [
+  { code: 'es', label: 'ES', flag: '🇲🇽' },
+  { code: 'en', label: 'EN', flag: '🇺🇸' },
+  { code: 'pt', label: 'PT', flag: '🇧🇷' },
+]
 
 export default function App() {
   const {
@@ -22,8 +31,12 @@ export default function App() {
     disconnectFreighter,
   } = useWallet()
 
+  const { lang, setLang, t } = useLanguage()
+  const { network, toggleNetwork } = useNetwork()
+
   const [showEscrow, setShowEscrow] = useState(false)
   const [showDrawer, setShowDrawer] = useState(false)
+  const [showRamp,   setShowRamp]   = useState(false)
 
   const anyError = acceslyError || freighterError
 
@@ -40,10 +53,40 @@ export default function App() {
         </div>
 
         <div className="nav-wallet">
+          {/* ── Language Selector ── */}
+          <div className="lang-selector">
+            {LANGUAGES.map(l => (
+              <button
+                key={l.code}
+                className={`lang-btn${lang === l.code ? ' lang-btn--active' : ''}`}
+                onClick={() => setLang(l.code)}
+                title={l.label}
+              >
+                <span className="lang-flag">{l.flag}</span>
+                <span className="lang-label">{l.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <button
+            className={`btn-network-toggle ${network === 'mainnet' ? 'btn-network-toggle--mainnet' : ''}`}
+            onClick={toggleNetwork}
+            title={network === 'testnet' ? 'Cambiar a Mainnet' : 'Cambiar a Testnet'}
+          >
+            {network === 'testnet' ? 'Testnet' : 'Mainnet'}
+          </button>
+
           {walletAddress && (
-            <button className="btn-my-escrows" onClick={() => setShowDrawer(true)}>
-              Mis Escrows
-            </button>
+            <>
+              {network === 'testnet' && (
+                <button className="btn-my-escrows" onClick={() => setShowRamp(true)}>
+                  {t.nav.ramp}
+                </button>
+              )}
+              <button className="btn-my-escrows" onClick={() => setShowDrawer(true)}>
+                {t.nav.myEscrows}
+              </button>
+            </>
           )}
 
           {/* ── Freighter wallet ── */}
@@ -51,14 +94,14 @@ export default function App() {
             <div className="wallet-chip">
               <span className="status-dot" />
               <span className="wallet-addr">{shortenAddress(freighterAddr)}</span>
-              <button className="btn-disconnect" onClick={disconnectFreighter} title="Desconectar Freighter">✕</button>
+              <button className="btn-disconnect" onClick={disconnectFreighter} title={t.nav.disconnectFreighter}>✕</button>
             </div>
           ) : (
             <button
               className="btn-connect-freighter"
               onClick={connectFreighter}
               disabled={freighterLoading}
-              title="Conectar Freighter"
+              title={t.nav.connectFreighter}
             >
               {freighterLoading
                 ? <span className="spinner" />
@@ -79,21 +122,17 @@ export default function App() {
 
       {/* ── HERO ── */}
       <header className="hero">
-        <p className="hero-eyebrow">Stellar Hackathon 2026</p>
+        <p className="hero-eyebrow">{t.hero.eyebrow}</p>
         <h1 className="hero-title">
-          Rieles de Confianza<br />
-          <span className="text-gold">para el Comercio Mexicano</span>
+          {t.hero.title1}<br />
+          <span className="text-gold">{t.hero.title2}</span>
         </h1>
-        <p className="hero-body">
-          Custodia programática sobre Stellar. El dinero solo se libera cuando
-          las condiciones del trato se cumplen — sin intermediarios, sin fraude,
-          con certeza matemática.
-        </p>
+        <p className="hero-body">{t.hero.body}</p>
         <div className="hero-actions">
           {walletAddress ? (
             <>
               <button className="btn-primary" onClick={() => setShowEscrow(true)}>
-                Crear Escrow
+                {t.hero.createEscrow}
               </button>
               <div className="connected-badge">
                 <span className="status-dot" />
@@ -102,10 +141,10 @@ export default function App() {
             </>
           ) : (
             <button className="btn-primary" onClick={connectAccesly} disabled={acceslyLoading}>
-              {acceslyLoading ? 'Conectando...' : 'Empezar ahora'}
+              {acceslyLoading ? t.hero.connecting : t.hero.startNow}
             </button>
           )}
-          <a href="#vision" className="btn-ghost">Ver más</a>
+          <a href="#vision" className="btn-ghost">{t.hero.seeMore}</a>
         </div>
       </header>
 
@@ -114,51 +153,36 @@ export default function App() {
 
       {/* ── VISIÓN ── */}
       <section id="vision" className="section">
-        <span className="tag">Panorama General</span>
-        <h2>¿Qué es Kivo?</h2>
-        <p className="body-text">
-          Kivo es una infraestructura fintech de <em>"Rieles de Confianza"</em> diseñada
-          para el mercado mexicano y transfronterizo. Funciona como una plataforma de{' '}
-          <strong>custodia programática (Escrow)</strong> que asegura transacciones de alto
-          valor eliminando el riesgo de fraude entre desconocidos.
-        </p>
-        <p className="body-text">
-          A diferencia de un notario tradicional, Kivo utiliza la red{' '}
-          <strong>Stellar</strong> para garantizar que el dinero solo se libere cuando
-          las condiciones del trato se cumplan, transformando la desconfianza del mercado
-          informal en <strong>certeza matemática</strong>.
-        </p>
+        <span className="tag">{t.vision.tag}</span>
+        <h2>{t.vision.title}</h2>
+        <p className="body-text">{t.vision.p1}</p>
+        <p className="body-text">{t.vision.p2}</p>
       </section>
 
       {/* ── PROBLEMA ── */}
       <section className="section section-alt">
-        <span className="tag">El Problema</span>
-        <h2>Lo que resolvemos</h2>
+        <span className="tag">{t.problem.tag}</span>
+        <h2>{t.problem.title}</h2>
         <div className="two-col">
           <div className="card">
             <div className="card-icon teal-icon">⬡</div>
-            <h3>Inseguridad en Transacciones</h3>
-            <p>El miedo a estafas en la compraventa de autos o inmuebles genera parálisis financiera en México.</p>
+            <h3>{t.problem.card1Title}</h3>
+            <p>{t.problem.card1Body}</p>
           </div>
           <div className="card">
             <div className="card-icon gold-icon">⬡</div>
-            <h3>Fricción en Remesas</h3>
-            <p>Los migrantes en EE. UU. no tienen forma segura de pagar activos directamente en México garantizando que el dinero llegue al vendedor real.</p>
+            <h3>{t.problem.card2Title}</h3>
+            <p>{t.problem.card2Body}</p>
           </div>
         </div>
       </section>
 
       {/* ── ARQUITECTURA ── */}
       <section className="section">
-        <span className="tag">Arquitectura Técnica</span>
-        <h2>Cuatro pilares Stellar-Native</h2>
+        <span className="tag">{t.arch.tag}</span>
+        <h2>{t.arch.title}</h2>
         <div className="four-col">
-          {[
-            { n: '01', title: 'Smart Contracts', sub: 'Soroban / Rust', body: 'Cofre digital inmutable. Los fondos se bloquean y solo se liberan bajo condiciones predefinidas y auditables.' },
-            { n: '02', title: 'Rampa de Rendimiento', sub: 'Etherfuse / RWA', body: 'El capital en custodia se convierte en tokens de bonos gubernamentales — productivo en lugar de estático.' },
-            { n: '03', title: 'On/Off Ramps', sub: 'SEP-24 · Bitso · Anclap', body: 'Depósitos vía SPEI y retiros bancarios instantáneos en múltiples divisas a través de Anchors nativos.' },
-            { n: '04', title: 'AI Concierge', sub: 'WhatsApp + App', body: 'Agente inteligente que traduce la complejidad blockchain a lenguaje sencillo. Soporte 24/7 del estado del dinero.' },
-          ].map(p => (
+          {t.arch.pillars.map(p => (
             <div className="pillar" key={p.n}>
               <span className="pillar-n">{p.n}</span>
               <h3>{p.title}</h3>
@@ -171,16 +195,11 @@ export default function App() {
 
       {/* ── MODELO DE NEGOCIO ── */}
       <section className="section section-alt">
-        <span className="tag">Business Model</span>
-        <h2>Modelo de Negocio</h2>
+        <span className="tag">{t.bmc.tag}</span>
+        <h2>{t.bmc.title}</h2>
 
         <div className="four-col bmc">
-          {[
-            { title: 'Propuesta de Valor', items: ['"Confianza Instantánea": escrow inmutable con rendimientos reales (RWA) y comisiones competitivas.'] },
-            { title: 'Clientes', items: ['Mexicanos en EE. UU.', 'Lotes de autos · Inmobiliarias', 'Freelancers internacionales'] },
-            { title: 'Socios Clave', items: ['SDF · Stellar Foundation', 'Etherfuse (RWA)', 'Bitso · Anclap', 'Compliance MX/EE.UU.'] },
-            { title: 'Recursos', items: ['Contratos Soroban', 'Red de Anchors', 'Agentes de IA', 'Reputación on-chain'] },
-          ].map(b => (
+          {t.bmc.blocks.map(b => (
             <div className="bmc-block" key={b.title}>
               <h4>{b.title}</h4>
               <ul>{b.items.map(i => <li key={i}>{i}</li>)}</ul>
@@ -190,24 +209,21 @@ export default function App() {
 
         {/* Ingresos */}
         <div className="revenue-block">
-          <h3>Modelo Financiero</h3>
+          <h3>{t.bmc.financial}</h3>
           <div className="revenue-grid">
             <div>
-              <p className="rev-label">Comisiones por transacción</p>
+              <p className="rev-label">{t.bmc.txFees}</p>
               <div className="fee-list">
                 <div className="fee-item"><span>Starter</span><span className="fee-num">3%</span></div>
                 <div className="fee-item"><span>Growth</span><span className="fee-num">2.5%</span></div>
                 <div className="fee-item"><span>Enterprise</span><span className="fee-num">—</span></div>
               </div>
-              <p className="rev-note">+ Float Yield en custodia · + Verificación vehicular y legal</p>
+              <p className="rev-note">{t.bmc.floatNote}</p>
             </div>
             <div>
-              <p className="rev-label">Estructura de Costos</p>
+              <p className="rev-label">{t.bmc.costStructure}</p>
               <ul className="cost-list">
-                <li>Auditoría de Smart Contracts e IA</li>
-                <li>Compliance regulatorio MX/EE.UU.</li>
-                <li>Infraestructura cloud</li>
-                <li>Adquisición de clientes</li>
+                {t.bmc.costs.map(c => <li key={c}>{c}</li>)}
               </ul>
             </div>
           </div>
@@ -216,14 +232,10 @@ export default function App() {
 
       {/* ── OBJETIVOS ── */}
       <section className="section">
-        <span className="tag">Hackathon 2026</span>
-        <h2>Objetivos de Demostración</h2>
+        <span className="tag">{t.goals.tag}</span>
+        <h2>{t.goals.title}</h2>
         <div className="three-col">
-          {[
-            { icon: '⚡', title: 'Interoperabilidad', body: 'Movimiento de fondos de EE. UU. a México con liquidación en segundos.' },
-            { icon: '◈', title: 'Eficiencia', body: 'Transacciones de bajo costo para proteger desde micro-pagos hasta grandes capitales.' },
-            { icon: '⬟', title: 'Impacto Social', body: 'Proteger el patrimonio de familias mexicanas frente al fraude documental y financiero.' },
-          ].map(g => (
+          {t.goals.items.map(g => (
             <div className="goal-card" key={g.title}>
               <span className="goal-icon">{g.icon}</span>
               <h3>{g.title}</h3>
@@ -237,10 +249,17 @@ export default function App() {
       <div className="divider" />
       <section className="quote-section">
         <blockquote>
-          Kivo convierte la desconfianza del mercado informal en la{' '}
-          <span className="text-gold">certeza matemática de la red Stellar</span>,
-          protegiendo el esfuerzo de los trabajadores y haciendo que su dinero rinda
-          incluso antes de ser gastado.
+          {(() => {
+            const idx = t.quote.indexOf(t.quoteHighlight)
+            if (idx === -1) return t.quote
+            return (
+              <>
+                {t.quote.substring(0, idx)}
+                <span className="text-gold">{t.quoteHighlight}</span>
+                {t.quote.substring(idx + t.quoteHighlight.length)}
+              </>
+            )
+          })()}
         </blockquote>
       </section>
 
@@ -249,8 +268,13 @@ export default function App() {
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
           <polygon points="10,1 18,5.5 18,14.5 10,19 2,14.5 2,5.5" stroke="var(--gold)" strokeWidth="1.5" fill="none"/>
         </svg>
-        <span>Kivo · Stellar Hackathon 2026</span>
+        <span>{t.footer}</span>
       </footer>
+
+      {/* ── RAMP MODAL ── */}
+      {showRamp && (
+        <RampPage onClose={() => setShowRamp(false)} />
+      )}
 
       {/* ── ESCROW MODAL ── */}
       {showEscrow && (
