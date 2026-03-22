@@ -7,6 +7,10 @@ import { WalletProvider } from './context/WalletContext'
 import { LanguageProvider } from './context/LanguageContext'
 import './index.css'
 import App from './App.jsx'
+import { BuyPage } from './pages/BuyPage.jsx'
+
+// Si la URL contiene el parámetro "seller", renderizamos la página de compra
+const isBuyPage = new URLSearchParams(window.location.search).has('seller')
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -20,7 +24,7 @@ createRoot(document.getElementById('root')).render(
           {/* WalletProvider debe estar dentro de AcceslyProvider para usar useAccesly */}
           <WalletProvider>
             <LanguageProvider>
-              <App />
+              {isBuyPage ? <BuyPage /> : <App />}
             </LanguageProvider>
           </WalletProvider>
         </AcceslyProvider>

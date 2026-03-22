@@ -20,7 +20,7 @@ export function EscrowModal({ walletAddress, onClose }) {
     receiver:        '',
     disputeResolver: '',
     amount:          '',
-    platformFee:     '2',
+    platformFee:     '1',
   })
 
   function handleChange(ev) {
@@ -126,7 +126,7 @@ export function EscrowModal({ walletAddress, onClose }) {
 
             <div className="form-field">
               <label className="form-label">{e.fieldFee}</label>
-              <div className="platform-fee-badge">2%</div>
+              <div className="platform-fee-badge">1%</div>
             </div>
           </div>
 

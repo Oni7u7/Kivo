@@ -3,9 +3,10 @@ import { ConnectButton } from 'accesly'
 import { useWallet } from './context/WalletContext'
 import { useLanguage } from './context/LanguageContext'
 import { useNetwork } from './context/NetworkContext'
-import { EscrowModal }  from './components/EscrowModal'
-import { EscrowDrawer } from './components/EscrowDrawer'
-import { RampPage }     from './components/Ramp/RampPage'
+import { EscrowModal }       from './components/EscrowModal'
+import { EscrowDrawer }      from './components/EscrowDrawer'
+import { RampPage }          from './components/Ramp/RampPage'
+import { CreateOfferModal }  from './components/CreateOfferModal'
 import './App.css'
 
 function shortenAddress(addr) {
@@ -37,6 +38,7 @@ export default function App() {
   const [showEscrow, setShowEscrow] = useState(false)
   const [showDrawer, setShowDrawer] = useState(false)
   const [showRamp,   setShowRamp]   = useState(false)
+  const [showOffer,  setShowOffer]  = useState(false)
 
   const anyError = acceslyError || freighterError
 
@@ -83,6 +85,9 @@ export default function App() {
                   {t.nav.ramp}
                 </button>
               )}
+              <button className="btn-my-escrows" onClick={() => setShowOffer(true)}>
+                Vender
+              </button>
               <button className="btn-my-escrows" onClick={() => setShowDrawer(true)}>
                 {t.nav.myEscrows}
               </button>
@@ -274,6 +279,11 @@ export default function App() {
       {/* ── RAMP MODAL ── */}
       {showRamp && (
         <RampPage onClose={() => setShowRamp(false)} />
+      )}
+
+      {/* ── CREAR OFERTA / QR MODAL ── */}
+      {showOffer && (
+        <CreateOfferModal onClose={() => setShowOffer(false)} />
       )}
 
       {/* ── ESCROW MODAL ── */}
