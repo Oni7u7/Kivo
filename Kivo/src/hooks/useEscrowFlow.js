@@ -6,9 +6,7 @@ import {
   useApproveMilestone,
   useSendTransaction,
 } from '@trustless-work/escrow/hooks'
-import { signTransaction } from '@stellar/freighter-api'
-
-const NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015'
+import { useWallet } from '../context/WalletContext'
 
 const USDC_TESTNET = {
   symbol: 'USDC',
@@ -16,14 +14,6 @@ const USDC_TESTNET = {
 }
 
 const KIVO_PLATFORM_ADDRESS = import.meta.env.VITE_KIVO_PLATFORM_ADDRESS || ''
-
-async function signWithFreighter(unsignedXdr, walletAddress) {
-  const result = await signTransaction(unsignedXdr, {
-    networkPassphrase: NETWORK_PASSPHRASE,
-    address: walletAddress,
-  })
-  return result.signedTxXdr
-}
 
 /**
  * Extrae el mensaje de error real de una respuesta Axios 4xx/5xx.
@@ -41,6 +31,8 @@ export function useEscrowFlow() {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(null)
   const [result, setResult]   = useState(null)
+
+  const { signTransaction } = useWallet()
 
   const { deployEscrow }            = useInitializeEscrow()
   const { fundEscrow: fund }        = useFundEscrow()
@@ -82,8 +74,8 @@ export function useEscrowFlow() {
       if (status === 'FAILED' || !unsignedTransaction)
         throw new Error('El despliegue del escrow falló. Revisa tu API Key y conexión.')
 
-      const signedXdr = await signWithFreighter(unsignedTransaction, walletAddress)
-      const txResult  = await sendTransaction(signedXdr)
+      const { signedXdr } = await signTransaction(unsignedTransaction)
+      const txResult      = await sendTransaction(signedXdr)
 
       const contractId = txResult?.contractId || txResult?.data?.contractId || null
       const outcome = { contractId, status: txResult?.status }
@@ -109,8 +101,8 @@ export function useEscrowFlow() {
       if (status === 'FAILED' || !unsignedTransaction)
         throw new Error('No se pudo financiar el escrow.')
 
-      const signedXdr = await signWithFreighter(unsignedTransaction, walletAddress)
-      const txResult  = await sendTransaction(signedXdr)
+      const { signedXdr } = await signTransaction(unsignedTransaction)
+      const txResult      = await sendTransaction(signedXdr)
       setResult({ funded: true, status: txResult?.status })
     } catch (err) {
       const msg = extractError(err, 'Error al financiar el escrow.')
@@ -142,8 +134,8 @@ export function useEscrowFlow() {
       if (status === 'FAILED' || !unsignedTransaction)
         throw new Error('No se pudo aprobar el hito.')
 
-      const signedXdr = await signWithFreighter(unsignedTransaction, walletAddress)
-      const txResult  = await sendTransaction(signedXdr)
+      const { signedXdr } = await signTransaction(unsignedTransaction)
+      const txResult      = await sendTransaction(signedXdr)
       setResult({ approved: true, status: txResult?.status })
     } catch (err) {
       const msg = extractError(err, 'Error al aprobar el hito.')
@@ -165,8 +157,8 @@ export function useEscrowFlow() {
       if (status === 'FAILED' || !unsignedTransaction)
         throw new Error('No se pudo liberar los fondos.')
 
-      const signedXdr = await signWithFreighter(unsignedTransaction, releaseSigner)
-      const txResult  = await sendTransaction(signedXdr)
+      const { signedXdr } = await signTransaction(unsignedTransaction)
+      const txResult      = await sendTransaction(signedXdr)
       setResult({ released: true, status: txResult?.status })
     } catch (err) {
       const msg = extractError(err, 'Error al liberar los fondos.')

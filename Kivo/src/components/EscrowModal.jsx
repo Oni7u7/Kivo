@@ -24,7 +24,7 @@ export function EscrowModal({ walletAddress, onClose }) {
     receiver:        '',
     disputeResolver: '',
     amount:          '',
-    platformFee:     '3',
+    platformFee:     '2',
   })
 
   function handleChange(e) {
@@ -130,19 +130,10 @@ export function EscrowModal({ walletAddress, onClose }) {
               />
             </Field>
 
-            <Field label="Comisión plataforma (%)" hint="Kivo cobra sobre el total">
-              <input
-                type="number"
-                name="platformFee"
-                placeholder="3"
-                min="0"
-                max="100"
-                step="0.1"
-                value={form.platformFee}
-                onChange={handleChange}
-                required
-              />
-            </Field>
+            <div className="form-field">
+              <label className="form-label">Comisión Kivo</label>
+              <div className="platform-fee-badge">2%</div>
+            </div>
           </div>
 
           <Field label="Dirección del Vendedor (Service Provider)" required>

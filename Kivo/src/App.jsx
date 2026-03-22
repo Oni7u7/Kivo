@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import { isConnected, requestAccess, getAddress } from '@stellar/freighter-api'
+import { useState } from 'react'
+import { ConnectButton } from 'accesly'
+import { useWallet } from './context/WalletContext'
 import { EscrowModal }  from './components/EscrowModal'
 import { EscrowDrawer } from './components/EscrowDrawer'
 import './App.css'
@@ -9,46 +10,22 @@ function shortenAddress(addr) {
 }
 
 export default function App() {
-  const [walletAddress, setWalletAddress] = useState(null)
-  const [connecting, setConnecting] = useState(false)
-  const [walletError, setWalletError] = useState(null)
-  const [showEscrow, setShowEscrow]   = useState(false)
-  const [showDrawer, setShowDrawer]   = useState(false)
+  const {
+    walletAddress,
+    connectAccesly,
+    acceslyLoading,
+    acceslyError,
+    freighterAddr,
+    freighterLoading,
+    freighterError,
+    connectFreighter,
+    disconnectFreighter,
+  } = useWallet()
 
-  useEffect(() => {
-    async function checkWallet() {
-      try {
-        const connected = await isConnected()
-        if (connected) {
-          const { address } = await getAddress()
-          if (address) setWalletAddress(address)
-        }
-      } catch (_) {}
-    }
-    checkWallet()
-  }, [])
+  const [showEscrow, setShowEscrow] = useState(false)
+  const [showDrawer, setShowDrawer] = useState(false)
 
-  async function handleConnect() {
-    setConnecting(true)
-    setWalletError(null)
-    try {
-      const { address, error } = await requestAccess()
-      if (error) {
-        setWalletError('No se pudo conectar. ¿Tienes Freighter instalado?')
-      } else {
-        setWalletAddress(address)
-      }
-    } catch (_) {
-      setWalletError('Freighter no encontrado. Instala la extensión.')
-    } finally {
-      setConnecting(false)
-    }
-  }
-
-  function handleDisconnect() {
-    setWalletAddress(null)
-    setWalletError(null)
-  }
+  const anyError = acceslyError || freighterError
 
   return (
     <div className="app">
@@ -63,33 +40,41 @@ export default function App() {
         </div>
 
         <div className="nav-wallet">
-          {walletAddress ? (
-            <>
-              <button className="btn-my-escrows" onClick={() => setShowDrawer(true)}>
-                Mis Escrows
-              </button>
-              <div className="wallet-chip">
-                <span className="status-dot" />
-                <span className="wallet-addr">{shortenAddress(walletAddress)}</span>
-              </div>
-              <button className="btn-disconnect" onClick={handleDisconnect}>
-                Desconectar
-              </button>
-            </>
-          ) : (
-            <button className="btn-connect" onClick={handleConnect} disabled={connecting}>
-              {connecting ? (
-                <><span className="spinner" /> Conectando</>
-              ) : (
-                'Conectar Wallet'
-              )}
+          {walletAddress && (
+            <button className="btn-my-escrows" onClick={() => setShowDrawer(true)}>
+              Mis Escrows
             </button>
           )}
+
+          {/* ── Freighter wallet ── */}
+          {freighterAddr ? (
+            <div className="wallet-chip">
+              <span className="status-dot" />
+              <span className="wallet-addr">{shortenAddress(freighterAddr)}</span>
+              <button className="btn-disconnect" onClick={disconnectFreighter} title="Desconectar Freighter">✕</button>
+            </div>
+          ) : (
+            <button
+              className="btn-connect-freighter"
+              onClick={connectFreighter}
+              disabled={freighterLoading}
+              title="Conectar Freighter"
+            >
+              {freighterLoading
+                ? <span className="spinner" />
+                : <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><path d="M16 3L29 10v12L16 29 3 22V10z" stroke="currentColor" strokeWidth="2" fill="none"/><circle cx="16" cy="16" r="4" fill="currentColor"/></svg>
+              }
+              Freighter
+            </button>
+          )}
+
+          {/* ── Accesly wallet ── */}
+          <ConnectButton />
         </div>
       </nav>
 
-      {walletError && (
-        <div className="error-banner">{walletError}</div>
+      {anyError && (
+        <div className="error-banner">{anyError}</div>
       )}
 
       {/* ── HERO ── */}
@@ -116,8 +101,8 @@ export default function App() {
               </div>
             </>
           ) : (
-            <button className="btn-primary" onClick={handleConnect} disabled={connecting}>
-              {connecting ? 'Conectando...' : 'Empezar con Freighter'}
+            <button className="btn-primary" onClick={connectAccesly} disabled={acceslyLoading}>
+              {acceslyLoading ? 'Conectando...' : 'Empezar ahora'}
             </button>
           )}
           <a href="#vision" className="btn-ghost">Ver más</a>
